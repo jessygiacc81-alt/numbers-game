@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>English Words Adventure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- MASCOT OVERLAY -->
+    <div id="mascotOverlay" class="overlay hiddenScreen" role="dialog" aria-modal="true">
+      <div class="overlayCard">
+        <h2 class="overlayTitle">Scegli la tua mascotte</h2>
+        <p class="overlaySubtitle">Potrai cambiarla quando vuoi.</p>
+        <div class="mascotGrid">
+          <button class="mascotChoice" data-mascot="mascot-1" data-name="Momo" type="button">
+            <div class="mascotAvatar">
+              <img src="assets/mascot-1.png" alt="Mascotte blu" />
+              <div class="mascotFallback">M</div>
+            </div>
+            <span>Momo</span>
+          </button>
+          <button class="mascotChoice" data-mascot="mascot-2" data-name="Luna" type="button">
+            <div class="mascotAvatar">
+              <img src="assets/mascot-2.png" alt="Mascotte crema" />
+              <div class="mascotFallback">L</div>
+            </div>
+            <span>Luna</span>
+          </button>
+          <button class="mascotChoice" data-mascot="mascot-3" data-name="Nino" type="button">
+            <div class="mascotAvatar">
+              <img src="assets/mascot-3.png" alt="Mascotte verde" />
+              <div class="mascotFallback">N</div>
+            </div>
+            <span>Nino</span>
+          </button>
+          <button class="mascotChoice" data-mascot="mascot-4" data-name="Zoe" type="button">
+            <div class="mascotAvatar">
+              <img src="assets/mascot-4.png" alt="Mascotte arancione" />
+              <div class="mascotFallback">Z</div>
+            </div>
+            <span>Zoe</span>
+          </button>
+          <button class="mascotChoice" data-mascot="mascotte-5" data-name="Maya" type="button">
+            <div class="mascotAvatar">
+              <img src="assets/mascotte-5.png" alt="Mascotte rosa" />
+              <div class="mascotFallback">M</div>
+            </div>
+            <span>Maya</span>
+          </button>
+          <button class="mascotChoice" data-mascot="mascotte-6" data-name="Lillo" type="button">
+            <div class="mascotAvatar">
+              <img src="assets/mascotte-6.png" alt="Mascotte gialla" />
+              <div class="mascotFallback">L</div>
+            </div>
+            <span>Lillo</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOME SCREEN -->
+    <section id="homeScreen" class="screen">
+      <div class="homeCard">
+
+        <div class="heroRow">
+          <div class="mascotFrame">
+            <img id="mascotHome" src="assets/mascot-1.png" alt="Mascotte selezionata" />
+          </div>
+          <div class="heroText">
+            <h1 class="homeTitle">English Words Adventure</h1>
+            <p class="homeSubtitle">Impara l’inglese giocando!</p>
+            <div class="heroPill" id="progressPill">Categoria: Numeri · Livello 1</div>
+          </div>
+        </div>
+
+        <div class="homeSections">
+          <div class="block">
+            <div class="blockTitle">Scegli la categoria</div>
+            <div id="categoryGrid" class="categoryGrid" role="list"></div>
+          </div>
+
+          <div class="block">
+            <div class="blockTitle">Scegli il gioco</div>
+            <div class="modeRow">
+              <button id="gameChoiceBtn" class="modeBtn active">Scelta rapida</button>
+              <button id="gameBuildBtn" class="modeBtn">Costruisci parola</button>
+              <button id="gameTypeBtn" class="modeBtn">Scrivi parola</button>
+            </div>
+          </div>
+
+          <div class="block">
+            <div class="blockTitle">Giocatori</div>
+            <div class="modeRow">
+              <button id="playerSingleBtn" class="modeBtn active">Singolo</button>
+              <button id="playerTwoBtn" class="modeBtn">Due giocatori</button>
+            </div>
+            <div class="playerNames">
+              <label class="playerField">
+                <span>Nome giocatore 1</span>
+                <input id="player1Name" type="text" placeholder="Giocatore 1" maxlength="16" autocomplete="off" />
+              </label>
+              <label class="playerField">
+                <span>Nome giocatore 2</span>
+                <input id="player2Name" type="text" placeholder="Giocatore 2" maxlength="16" autocomplete="off" />
+              </label>
+            </div>
+          </div>
+
+          <div class="block">
+            <div class="blockTitle">Mascotte</div>
+            <div class="mascotMiniRow">
+              <div class="mascotMiniInfo">
+                <div class="mascotMiniAvatar">
+                  <img id="player1MascotImg" src="assets/mascot-1.png" alt="Mascotte giocatore 1" />
+                </div>
+                <span id="player1MascotLabel" class="mascotName">Giocatore 1 · Momo</span>
+              </div>
+              <button id="changeMascotP1Btn" class="ghostBtn smallBtn">Mascotte P1</button>
+            </div>
+            <div class="mascotMiniRow">
+              <div class="mascotMiniInfo">
+                <div class="mascotMiniAvatar">
+                  <img id="player2MascotImg" src="assets/mascot-2.png" alt="Mascotte giocatore 2" />
+                </div>
+                <span id="player2MascotLabel" class="mascotName">Giocatore 2 · Luna</span>
+              </div>
+              <button id="changeMascotP2Btn" class="ghostBtn smallBtn">Mascotte P2</button>
+            </div>
+          </div>
+
+          <div class="block">
+            <div class="blockTitle">Progressi</div>
+            <button id="openProgressBtn" class="ghostBtn">Apri tabella progressi</button>
+          </div>
+        </div>
+
+        <button id="startBtn" class="primaryBtn">Inizia ▶</button>
+        <button id="resetProgressBtn" class="ghostBtn">Reset progressi</button>
+
+        <p class="homeHint">Suggerimento: premi 🔊 per riascoltare.</p>
+      </div>
+    </section>
+
+    <!-- GAME SCREEN -->
+    <section id="gameScreen" class="screen hiddenScreen">
+      <header>
+        <div class="leftInfo">
+          <div id="progress">●○○○○</div>
+          <div id="levelLabel" class="levelLabel">Categoria · Livello</div>
+          <div id="playerTurnLabel" class="playerTurn"></div>
+        </div>
+
+        <div class="rightInfo">
+          <div id="stars" class="topStars">⭐ 0</div>
+        </div>
+      </header>
+
+      <main>
+        <div class="mascotFrame gameMascot">
+          <img id="mascotGame" src="assets/mascot-1.png" alt="Mascotte" />
+        </div>
+
+        <div class="prompt">
+          <div id="promptText">Tocca</div>
+          <button id="speaker" aria-label="Repeat audio">🔊</button>
+        </div>
+
+        <div id="reinforcement" class="hidden"></div>
+
+        <!-- LEVEL 1 -->
+        <div id="options"></div>
+
+        <!-- LEVEL 2 -->
+        <div id="lettersGame" class="lettersGame hiddenBox">
+          <div class="wordTarget">
+            <div class="wordLabel">Costruisci la parola</div>
+            <div id="builtWord" class="builtWord" aria-live="polite"></div>
+          </div>
+
+          <div class="letterBankWrap">
+            <div class="wordLabel">Lettere</div>
+            <div id="letterBank" class="letterBank"></div>
+          </div>
+
+          <div class="lettersActions">
+            <button id="clearWordBtn" class="ghostBtn smallBtn">Cancella</button>
+            <button id="hintBtn" class="ghostBtn smallBtn">Suggerimento</button>
+          </div>
+        </div>
+
+        <!-- LEVEL 3 -->
+        <div id="typingGame" class="typingGame hiddenBox">
+          <div class="typingPrompt">
+            <div class="wordLabel">Scrivi la parola</div>
+            <div id="typingFigure" class="typingFigure" aria-live="polite"></div>
+          </div>
+
+          <div class="typingControls">
+            <input id="typingInput" class="typingInput" type="text" placeholder="Scrivi qui..." autocomplete="off" spellcheck="false" />
+            <button id="typingSubmitBtn" class="primaryBtn smallBtn">Invia</button>
+          </div>
+          <div class="typingHint">Premi Invio o clicca Invia.</div>
+        </div>
+
+        <button id="backHomeBtn" class="ghostBtn smallBtn">← Home</button>
+      </main>
+    </section>
+
+    <!-- WIN SCREEN -->
+    <section id="winScreen" class="screen hiddenScreen">
+      <div class="winCard">
+        <div class="confetti" aria-hidden="true"></div>
+        <div class="mascotFrame winMascot">
+          <img id="mascotWin" src="assets/mascot-1.png" alt="Mascotte" />
+        </div>
+
+        <h2 id="winTitle" class="winTitle">Bravo!</h2>
+        <p id="winSubtitle" class="winSubtitle">Hai completato il livello.</p>
+
+        <div id="winStatsSingle" class="winStats">
+          <div class="statPill"><span>⭐</span> <span id="winStars">0</span></div>
+          <div class="statPill"><span>🏁</span> <span id="winStage">Livello</span></div>
+        </div>
+
+        <div class="badgeUnlock">
+          <div class="badgeTitle">Prossimo traguardo</div>
+          <div id="newBadge" class="bigBadge">🌟</div>
+          <div id="newBadgeLabel" class="badgeLabel">Continua!</div>
+        </div>
+
+        <button id="continueBtn" class="primaryBtn">Continua ▶</button>
+        <button id="homeFromWinBtn" class="ghostBtn">Torna alla home</button>
+      </div>
+    </section>
+
+    <!-- PROGRESS SCREEN -->
+    <section id="progressScreen" class="screen hiddenScreen">
+      <div class="progressCard">
+        <h2 class="progressTitle">Progressi</h2>
+        <p class="progressSubtitle">Punti per categoria e giocatore.</p>
+
+        <div class="progressTableWrap">
+          <table class="progressTable">
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th id="progressP1Label">Giocatore 1</th>
+                <th id="progressP2Label">Giocatore 2</th>
+              </tr>
+            </thead>
+            <tbody id="progressTableBody"></tbody>
+            <tfoot>
+              <tr>
+                <td>Totale</td>
+                <td id="progressTotalP1">0</td>
+                <td id="progressTotalP2">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <button id="resetPointsBtn" class="ghostBtn">Azzera punti</button>
+        <button id="backHomeFromProgressBtn" class="primaryBtn">Torna alla home</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
