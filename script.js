@@ -168,6 +168,7 @@ const STORAGE_PLAYER_MODE = "ewaPlayerMode";
 const STORAGE_PLAYER_NAMES = "ewaPlayerNames";
 const STORAGE_PLAYER_MASCOTS = "ewaPlayerMascots";
 const STORAGE_POINTS = "ewaPoints";
+const STORAGE_SELECTED_VOICE = "ewaSelectedVoice";
 
 // ----------------------
 // State
@@ -204,8 +205,10 @@ const homeScreen = document.getElementById("homeScreen");
 const gameScreen = document.getElementById("gameScreen");
 const winScreen  = document.getElementById("winScreen");
 const progressScreen = document.getElementById("progressScreen");
+const fullscreenOverlay = document.getElementById("fullscreenOverlay");
 
 const startBtn = document.getElementById("startBtn");
+const fullscreenHomeBtn = document.getElementById("fullscreenHomeBtn");
 const resetProgressBtn = document.getElementById("resetProgressBtn");
 const backHomeBtn = document.getElementById("backHomeBtn");
 
@@ -227,8 +230,11 @@ const playerSingleBtn = document.getElementById("playerSingleBtn");
 const playerTwoBtn = document.getElementById("playerTwoBtn");
 const player1NameInput = document.getElementById("player1Name");
 const player2NameInput = document.getElementById("player2Name");
+const voiceSelect = document.getElementById("voiceSelect");
 
 const speaker = document.getElementById("speaker");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+const fullscreenCloseBtn = document.getElementById("fullscreenCloseBtn");
 const reinforcement = document.getElementById("reinforcement");
 const promptText = document.getElementById("promptText");
 const optionsDiv = document.getElementById("options");
@@ -563,6 +569,32 @@ function showOnly(screen) {
   progressScreen.classList.add("hiddenScreen");
   screen.classList.remove("hiddenScreen");
 }
+
+function setFullscreenOverlay(visible) {
+  if (!fullscreenOverlay) return;
+  fullscreenOverlay.classList.toggle("hiddenScreen", !visible);
+}
+function enterFullscreen() {
+  const onFail = () => {
+    document.body.classList.add("fullscreenFallback");
+    setFullscreenOverlay(true);
+  };
+  if (document.fullscreenElement) return;
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().then(() => {
+      setFullscreenOverlay(true);
+    }).catch(onFail);
+  } else {
+    onFail();
+  }
+}
+function exitFullscreen() {
+  if (document.fullscreenElement && document.exitFullscreen) {
+    document.exitFullscreen();
+  }
+  document.body.classList.remove("fullscreenFallback");
+  setFullscreenOverlay(false);
+}
 function showHome() {
   showOnly(homeScreen);
   updateProgressPill();
@@ -623,6 +655,29 @@ function showWin(payload) {
 // Speech (TTS)
 // ----------------------
 let ttsPrimed = false;
+let cachedVoice = null;
+let selectedVoiceId = "";
+
+function voiceId(v) {
+  return v ? `${v.name}||${v.lang}` : "";
+}
+function loadSelectedVoice() {
+  const v = localStorage.getItem(STORAGE_SELECTED_VOICE);
+  if (v) selectedVoiceId = v;
+}
+function saveSelectedVoice() {
+  localStorage.setItem(STORAGE_SELECTED_VOICE, selectedVoiceId);
+}
+function pickEnglishVoice() {
+  if (!("speechSynthesis" in window)) return null;
+  const voices = speechSynthesis.getVoices() || [];
+  if (selectedVoiceId) {
+    const chosen = voices.find(v => voiceId(v) === selectedVoiceId);
+    if (chosen) return chosen;
+  }
+  const preferred = voices.find(v => v.lang === "en-US") || voices.find(v => v.lang.startsWith("en")) || null;
+  return preferred;
+}
 function primeTTS() {
   if (ttsPrimed || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
   const u = new SpeechSynthesisUtterance(" ");
@@ -647,9 +702,11 @@ function speakWord(word, onEnd = null) {
   }
   const utter = new SpeechSynthesisUtterance(word);
   utter.lang = "en-US";
-  utter.rate = 0.85;
-  utter.pitch = 1.1;
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
   utter.volume = 1;
+  if (!cachedVoice) cachedVoice = pickEnglishVoice();
+  if (cachedVoice) utter.voice = cachedVoice;
   if (typeof onEnd === "function") {
     utter.onend = onEnd;
     utter.onerror = onEnd;
@@ -668,6 +725,39 @@ function speakWord(word, onEnd = null) {
 function speakCurrent() {
   if (!correctItem) return;
   speakWord(correctItem.word);
+}
+
+function renderVoiceOptions() {
+  if (!voiceSelect || !("speechSynthesis" in window)) return;
+  const voices = speechSynthesis.getVoices() || [];
+  const english = voices.filter(v => v.lang.startsWith("en"));
+  const list = english.length ? english : voices;
+  voiceSelect.innerHTML = "";
+
+  if (!list.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "Voce non disponibile";
+    voiceSelect.appendChild(opt);
+    voiceSelect.disabled = true;
+    return;
+  }
+
+  voiceSelect.disabled = false;
+  list.forEach((v) => {
+    const opt = document.createElement("option");
+    opt.value = voiceId(v);
+    opt.textContent = `${v.name} (${v.lang})`;
+    voiceSelect.appendChild(opt);
+  });
+
+  const preferred = pickEnglishVoice();
+  const preferredId = preferred ? voiceId(preferred) : "";
+  const valueToSet = selectedVoiceId || preferredId || voiceId(list[0]);
+  voiceSelect.value = valueToSet;
+  selectedVoiceId = valueToSet;
+  saveSelectedVoice();
+  cachedVoice = pickEnglishVoice();
 }
 
 // ----------------------
@@ -1290,6 +1380,24 @@ speaker.addEventListener("click", () => {
   speakCurrent();
 });
 
+fullscreenBtn.addEventListener("click", () => {
+  enterFullscreen();
+});
+
+fullscreenCloseBtn.addEventListener("click", () => {
+  exitFullscreen();
+});
+
+fullscreenHomeBtn.addEventListener("click", () => {
+  enterFullscreen();
+});
+
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement) {
+    exitFullscreen();
+  }
+});
+
 startBtn.addEventListener("click", () => {
   ensureAudio();
   unlockTTS();
@@ -1397,6 +1505,13 @@ player2NameInput.addEventListener("input", () => {
   updateMascotUI();
 });
 
+voiceSelect.addEventListener("change", () => {
+  selectedVoiceId = voiceSelect.value || "";
+  saveSelectedVoice();
+  cachedVoice = pickEnglishVoice();
+  speakCurrent();
+});
+
 clearWordBtn.addEventListener("click", () => {
   ensureAudio();
   tone(520, 60, "sine", 0.05, 0);
@@ -1438,6 +1553,13 @@ typingInput.addEventListener("keydown", (event) => {
 // INIT
 // ----------------------
 function init() {
+  if ("speechSynthesis" in window) {
+    speechSynthesis.onvoiceschanged = () => {
+      cachedVoice = pickEnglishVoice();
+      renderVoiceOptions();
+    };
+  }
+  loadSelectedVoice();
   loadSelectedCategory();
   loadMascot();
   loadPlayerMode();
@@ -1452,6 +1574,7 @@ function init() {
   updateMascotUI();
   updatePlayerNameInputs();
   renderCategories();
+  renderVoiceOptions();
 
   showHome();
 

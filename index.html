@@ -77,6 +77,7 @@
             <h1 class="homeTitle">English Words Adventure</h1>
             <p class="homeSubtitle">Impara l’inglese giocando!</p>
             <div class="heroPill" id="progressPill">Categoria: Numeri · Livello 1</div>
+            <button id="fullscreenHomeBtn" class="ghostBtn smallBtn">Schermo intero</button>
           </div>
         </div>
 
@@ -139,6 +140,14 @@
             <div class="blockTitle">Progressi</div>
             <button id="openProgressBtn" class="ghostBtn">Apri tabella progressi</button>
           </div>
+
+          <div class="block">
+            <div class="blockTitle">Voce</div>
+            <label class="voiceField">
+              <span>Scegli la voce</span>
+              <select id="voiceSelect"></select>
+            </label>
+          </div>
         </div>
 
         <button id="startBtn" class="primaryBtn">Inizia ▶</button>
@@ -159,6 +168,7 @@
 
         <div class="rightInfo">
           <div id="stars" class="topStars">⭐ 0</div>
+          <button id="fullscreenBtn" class="ghostBtn smallBtn">Schermo intero</button>
         </div>
       </header>
 
@@ -212,6 +222,10 @@
         <button id="backHomeBtn" class="ghostBtn smallBtn">← Home</button>
       </main>
     </section>
+
+    <div id="fullscreenOverlay" class="fullscreenOverlay hiddenScreen" aria-hidden="true">
+      <button id="fullscreenCloseBtn" class="fullscreenClose" type="button" aria-label="Chiudi schermo intero">×</button>
+    </div>
 
     <!-- WIN SCREEN -->
     <section id="winScreen" class="screen hiddenScreen">
