@@ -205,10 +205,8 @@ const homeScreen = document.getElementById("homeScreen");
 const gameScreen = document.getElementById("gameScreen");
 const winScreen  = document.getElementById("winScreen");
 const progressScreen = document.getElementById("progressScreen");
-const fullscreenOverlay = document.getElementById("fullscreenOverlay");
 
 const startBtn = document.getElementById("startBtn");
-const fullscreenHomeBtn = document.getElementById("fullscreenHomeBtn");
 const resetProgressBtn = document.getElementById("resetProgressBtn");
 const backHomeBtn = document.getElementById("backHomeBtn");
 
@@ -233,8 +231,6 @@ const player2NameInput = document.getElementById("player2Name");
 const voiceSelect = document.getElementById("voiceSelect");
 
 const speaker = document.getElementById("speaker");
-const fullscreenBtn = document.getElementById("fullscreenBtn");
-const fullscreenCloseBtn = document.getElementById("fullscreenCloseBtn");
 const reinforcement = document.getElementById("reinforcement");
 const promptText = document.getElementById("promptText");
 const optionsDiv = document.getElementById("options");
@@ -570,31 +566,6 @@ function showOnly(screen) {
   screen.classList.remove("hiddenScreen");
 }
 
-function setFullscreenOverlay(visible) {
-  if (!fullscreenOverlay) return;
-  fullscreenOverlay.classList.toggle("hiddenScreen", !visible);
-}
-function enterFullscreen() {
-  const onFail = () => {
-    document.body.classList.add("fullscreenFallback");
-    setFullscreenOverlay(true);
-  };
-  if (document.fullscreenElement) return;
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen().then(() => {
-      setFullscreenOverlay(true);
-    }).catch(onFail);
-  } else {
-    onFail();
-  }
-}
-function exitFullscreen() {
-  if (document.fullscreenElement && document.exitFullscreen) {
-    document.exitFullscreen();
-  }
-  document.body.classList.remove("fullscreenFallback");
-  setFullscreenOverlay(false);
-}
 function showHome() {
   showOnly(homeScreen);
   updateProgressPill();
@@ -1380,23 +1351,6 @@ speaker.addEventListener("click", () => {
   speakCurrent();
 });
 
-fullscreenBtn.addEventListener("click", () => {
-  enterFullscreen();
-});
-
-fullscreenCloseBtn.addEventListener("click", () => {
-  exitFullscreen();
-});
-
-fullscreenHomeBtn.addEventListener("click", () => {
-  enterFullscreen();
-});
-
-document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement) {
-    exitFullscreen();
-  }
-});
 
 startBtn.addEventListener("click", () => {
   ensureAudio();
