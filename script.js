@@ -646,8 +646,9 @@ function pickEnglishVoice() {
     const chosen = voices.find(v => voiceId(v) === selectedVoiceId);
     if (chosen) return chosen;
   }
-  const preferred = voices.find(v => v.lang === "en-US") || voices.find(v => v.lang.startsWith("en")) || null;
-  return preferred;
+  const preferred = voices.find(v => v.lang === "en-GB") || voices.find(v => v.lang.startsWith("en-GB")) ||
+    voices.find(v => v.lang === "en-US") || voices.find(v => v.lang.startsWith("en")) || null;
+  return preferred || voices[0] || null;
 }
 function primeTTS() {
   if (ttsPrimed || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
@@ -672,7 +673,10 @@ function speakWord(word, onEnd = null) {
     return;
   }
   const utter = new SpeechSynthesisUtterance(word);
-  utter.lang = "en-US";
+  const rawLang = cachedVoice && cachedVoice.lang ? cachedVoice.lang : "en-US";
+  if (rawLang.startsWith("en-GB")) utter.lang = "en-GB";
+  else if (rawLang.startsWith("en")) utter.lang = "en-US";
+  else utter.lang = "en-US";
   utter.rate = 0.95;
   utter.pitch = 1.0;
   utter.volume = 1;
@@ -701,8 +705,24 @@ function speakCurrent() {
 function renderVoiceOptions() {
   if (!voiceSelect || !("speechSynthesis" in window)) return;
   const voices = speechSynthesis.getVoices() || [];
-  const english = voices.filter(v => v.lang.startsWith("en"));
-  const list = english.length ? english : voices;
+  const english = voices.filter(v => v.lang && v.lang.startsWith("en"));
+  const british = english.filter(v => v.lang.startsWith("en-GB"));
+
+  const femaleHints = ["female", "woman", "girl", "emma", "olivia", "sophia", "charlotte", "amelia", "isabella", "emily", "lucy", "grace", "victoria", "susan", "sarah", "zira", "hazel", "libby", "jenny", "joanna", "karen", "samantha"];
+  const maleHints = ["male", "man", "boy", "george", "james", "daniel", "ryan", "thomas", "arthur", "jack", "oliver", "peter", "tom", "brian", "owen"];
+
+  const lowerName = (v) => (v.name || "").toLowerCase();
+  const isFemale = (v) => femaleHints.some(h => lowerName(v).includes(h));
+  const isMale = (v) => maleHints.some(h => lowerName(v).includes(h));
+
+  const source = british.length ? british : (english.length ? english : voices);
+  let femaleVoice = source.find(isFemale) || source.find(v => lowerName(v).includes("female")) || null;
+  let maleVoice = source.find(isMale) || source.find(v => lowerName(v).includes("male")) || null;
+
+  if (!femaleVoice && source.length) femaleVoice = source[0];
+  if (!maleVoice && source.length > 1) maleVoice = source.find(v => v !== femaleVoice) || source[0];
+
+  const list = [femaleVoice, maleVoice].filter(Boolean);
   voiceSelect.innerHTML = "";
 
   if (!list.length) {
@@ -715,20 +735,22 @@ function renderVoiceOptions() {
   }
 
   voiceSelect.disabled = false;
-  list.forEach((v) => {
+  list.forEach((v, idx) => {
     const opt = document.createElement("option");
     opt.value = voiceId(v);
-    opt.textContent = `${v.name} (${v.lang})`;
+    const label = idx === 0 ? "Voce femminile" : "Voce maschile";
+    opt.textContent = `${label} - (${v.lang})`;
     voiceSelect.appendChild(opt);
   });
 
-  const preferred = pickEnglishVoice();
-  const preferredId = preferred ? voiceId(preferred) : "";
-  const valueToSet = selectedVoiceId || preferredId || voiceId(list[0]);
+  const preferredId = list[0] ? voiceId(list[0]) : "";
+  const valueToSet = selectedVoiceId && list.some(v => voiceId(v) === selectedVoiceId)
+    ? selectedVoiceId
+    : (preferredId || (list[0] ? voiceId(list[0]) : ""));
   voiceSelect.value = valueToSet;
   selectedVoiceId = valueToSet;
   saveSelectedVoice();
-  cachedVoice = pickEnglishVoice();
+  cachedVoice = list.find(v => voiceId(v) === selectedVoiceId) || pickEnglishVoice();
 }
 
 // ----------------------
@@ -1462,7 +1484,8 @@ player2NameInput.addEventListener("input", () => {
 voiceSelect.addEventListener("change", () => {
   selectedVoiceId = voiceSelect.value || "";
   saveSelectedVoice();
-  cachedVoice = pickEnglishVoice();
+  const voices = speechSynthesis.getVoices() || [];
+  cachedVoice = voices.find(v => voiceId(v) === selectedVoiceId) || pickEnglishVoice();
   speakCurrent();
 });
 
